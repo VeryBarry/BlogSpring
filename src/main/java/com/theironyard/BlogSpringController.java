@@ -39,21 +39,21 @@ public class BlogSpringController {
             m.isMe = m.user.username.equals(username);
         }
         model.addAttribute("messages", messagesIt);
-        model.addAttribute("user", user);
-        return "index";
+        model.addAttribute("username", user);
+        return "home";
     }
 
-    @RequestMapping(path = "/login", method = RequestMethod.GET)
-    public String login(String username, String password, HttpSession session) throws Exception {
-        User user = users.findByUsername(username);
+    @RequestMapping(path = "/login", method = RequestMethod.POST)
+    public String login(String userName, String userPass, HttpSession session) throws Exception {
+        User user = users.findByUsername(userName);
         if (user == null) {
-            user = new User(username, PasswordStorage.createHash(password));
+            user = new User(userName, PasswordStorage.createHash(userPass));
             users.save(user);
         }
-        else if (!PasswordStorage.verifyPassword(password, user.password)) {
+        else if (!PasswordStorage.verifyPassword("password" , user.password)) {
             throw new Exception("Wrong password!");
         }
-        session.setAttribute("username", username);
+        session.setAttribute("username", userName);
         return "redirect:/";
     }
 
@@ -64,13 +64,13 @@ public class BlogSpringController {
     }
 
     @RequestMapping(path = "/message", method = RequestMethod.POST)
-    public String addMessage(String text, HttpSession session) throws Exception {
+    public String addMessage(String message, HttpSession session) throws Exception {
         String name = (String) session.getAttribute("username");
         User user = users.findByUsername(name);
         if (user == null) {
             throw new Exception("Not logged in.");
         }
-        Message m = new Message(text, user);
+        Message m = new Message(message, user);
         messages.save(m);
         return "redirect:/";
     }
@@ -88,6 +88,18 @@ public class BlogSpringController {
         }
         messages.delete(m);
         return "redirect:/";
+    }
+    @RequestMapping(path = "/edit", method = RequestMethod.GET)
+    public String editGet(Model model, HttpSession session, int id) throws Exception {
+        String name = (String) session.getAttribute("username");
+        User user = users.findByUsername(name);
+        Message m = messages.findOne(id);
+        if (user == null) {
+            throw new Exception("you're not logged in.");
+        }
+        model.addAttribute("user", user);
+        model.addAttribute("message", m);
+        return "edit";
     }
     @RequestMapping(path = "/edit", method = RequestMethod.POST)
     public String edit(String text, Integer id, HttpSession session) throws Exception{

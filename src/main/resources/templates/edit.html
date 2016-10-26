@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Message</title>
+</head>
+<body>
+<form action="/edit" method="post">
+    <input type="hidden" value="{{message.id}}" name="id"/>
+    <input type="text" placeholder="Enter your new Message" name="text"/>
+    <button type="submit">Submit Edit</button>
+</form>
+</body>
+</html>
